@@ -28,13 +28,19 @@ const MonthlyPaymentCalculator = () => {
   const totalPaid = monthlyPayment * months;
   const totalInterest = totalPaid - totalLoanAmount;
   
-  // Comparison with bi-weekly
+  // Comparison with bi-weekly (using SAME loan amount for fair comparison)
   const biweeklyRate = annualRate / 100 / 26;
-  const biweeklyPayments = 130;
+  const biweeklyPayments = 130; // 26 payments/year × 5 years
   const biweeklyPayment = totalLoanAmount * (biweeklyRate * Math.pow(1 + biweeklyRate, biweeklyPayments)) / 
                           (Math.pow(1 + biweeklyRate, biweeklyPayments) - 1);
   const biweeklyTotalPaid = biweeklyPayment * biweeklyPayments;
   const biweeklyTotalInterest = biweeklyTotalPaid - totalLoanAmount;
+  
+  // DEALERSHIP'S ORIGINAL OFFER (for separate comparison)
+  const dealershipDownPayment = 3042.00;
+  const dealershipLoanAmount = 17664.94;
+  const dealershipBiweeklyPayment = 165.04;
+  const dealershipTotalInterest = 3789.66;
 
   // Opportunity cost calculations
   const extraDownPayment = downPayment - 3042.00;
@@ -343,14 +349,15 @@ const MonthlyPaymentCalculator = () => {
 
       {/* Comparison Section */}
       <div className="mt-8 p-6 bg-white border-2 border-gray-300 rounded-lg shadow-lg">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Payment Comparison: Monthly vs Bi-Weekly</h2>
+        <h2 className="text-xl font-bold mb-4 text-gray-800">Payment Frequency Comparison</h2>
+        
+        <p className="text-sm text-gray-600 mb-4 italic">
+          Comparing payment schedules for the SAME loan amount (${totalLoanAmount.toFixed(2)}):
+        </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-5 bg-green-50 border-2 border-green-400 rounded-lg">
-            <h3 className="font-bold text-green-800 mb-3 text-lg flex items-center gap-2">
-              <TrendingDown className="w-5 h-5" />
-              Monthly Payments (BEST)
-            </h3>
+          <div className="p-5 bg-blue-50 border-2 border-blue-400 rounded-lg">
+            <h3 className="font-bold text-blue-800 mb-3 text-lg">Monthly Payments</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Payment Amount:</span>
@@ -358,15 +365,19 @@ const MonthlyPaymentCalculator = () => {
               </div>
               <div className="flex justify-between">
                 <span>Number of Payments:</span>
-                <span className="font-bold">{months}</span>
+                <span className="font-bold">{months} payments</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Payment Frequency:</span>
+                <span className="font-bold">12 per year</span>
               </div>
               <div className="flex justify-between">
                 <span>Compounding:</span>
                 <span className="font-bold">Monthly (12x/year)</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-green-300">
+              <div className="flex justify-between pt-2 border-t border-blue-300">
                 <span>Total Interest:</span>
-                <span className="font-bold text-green-700">${totalInterest.toFixed(2)}</span>
+                <span className="font-bold text-blue-700">${totalInterest.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total Paid:</span>
@@ -375,8 +386,8 @@ const MonthlyPaymentCalculator = () => {
             </div>
           </div>
 
-          <div className="p-5 bg-red-50 border-2 border-red-400 rounded-lg">
-            <h3 className="font-bold text-red-800 mb-3 text-lg">Bi-Weekly Payments (WORSE)</h3>
+          <div className="p-5 bg-purple-50 border-2 border-purple-400 rounded-lg">
+            <h3 className="font-bold text-purple-800 mb-3 text-lg">Bi-Weekly Payments</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Payment Amount:</span>
@@ -384,15 +395,19 @@ const MonthlyPaymentCalculator = () => {
               </div>
               <div className="flex justify-between">
                 <span>Number of Payments:</span>
-                <span className="font-bold">{biweeklyPayments}</span>
+                <span className="font-bold">{biweeklyPayments} payments</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Payment Frequency:</span>
+                <span className="font-bold">26 per year</span>
               </div>
               <div className="flex justify-between">
                 <span>Compounding:</span>
                 <span className="font-bold">Bi-weekly (26x/year)</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-red-300">
+              <div className="flex justify-between pt-2 border-t border-purple-300">
                 <span>Total Interest:</span>
-                <span className="font-bold text-red-700">${biweeklyTotalInterest.toFixed(2)}</span>
+                <span className="font-bold text-purple-700">${biweeklyTotalInterest.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total Paid:</span>
@@ -402,10 +417,28 @@ const MonthlyPaymentCalculator = () => {
           </div>
         </div>
 
-        <div className="mt-6 p-4 bg-green-100 border-2 border-green-500 rounded-lg">
-          <div className="flex justify-between items-center">
-            <span className="font-bold text-green-900 text-lg">YOUR SAVINGS with Monthly Plan:</span>
-            <span className="font-bold text-green-700 text-2xl">${(biweeklyTotalInterest - totalInterest).toFixed(2)}</span>
+        <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-400 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">💡</span>
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-amber-900">Payment Frequency Impact:</span>
+                <span className="font-bold text-lg">${Math.abs(biweeklyTotalInterest - totalInterest).toFixed(2)} difference</span>
+              </div>
+              <p className="text-sm text-amber-800">
+                {biweeklyTotalInterest < totalInterest ? (
+                  <>
+                    <strong>Bi-weekly payments save ${(totalInterest - biweeklyTotalInterest).toFixed(2)}</strong> because you make 26 payments/year 
+                    (equivalent to 13 monthly payments), paying down principal faster and reducing total interest.
+                  </>
+                ) : (
+                  <>
+                    <strong>Monthly payments save ${(biweeklyTotalInterest - totalInterest).toFixed(2)}</strong> in this scenario. 
+                    The difference between payment frequencies is minimal at this rate and term.
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -463,11 +496,15 @@ const MonthlyPaymentCalculator = () => {
         <h2 className="text-xl font-bold mb-4 text-red-800">📊 Dealership's Original Offer (What They Wanted You to Pay)</h2>
         
         <div className="bg-white p-5 rounded-lg border-2 border-red-300 mb-4">
-          <h3 className="font-bold text-gray-800 mb-3">Nissan Dealership Offer:</h3>
+          <h3 className="font-bold text-gray-800 mb-3">Dealership's Original Offer:</h3>
           <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
             <div className="flex justify-between border-b border-gray-200 pb-1">
               <span className="text-gray-600">Down Payment:</span>
               <span className="font-semibold">$3,042.00</span>
+            </div>
+            <div className="flex justify-between border-b border-gray-200 pb-1">
+              <span className="text-gray-600">Loan Amount:</span>
+              <span className="font-semibold">$17,664.94</span>
             </div>
             <div className="flex justify-between border-b border-gray-200 pb-1">
               <span className="text-gray-600">Payment Frequency:</span>
@@ -489,6 +526,10 @@ const MonthlyPaymentCalculator = () => {
               <span className="text-gray-600">Compounding:</span>
               <span className="font-semibold">Bi-weekly (26x/year)</span>
             </div>
+            <div className="flex justify-between border-b border-gray-200 pb-1">
+              <span className="text-gray-600"></span>
+              <span className="font-semibold"></span>
+            </div>
             <div className="flex justify-between pt-2 col-span-2 border-t-2 border-red-300">
               <span className="font-bold text-red-700">Total Interest Paid:</span>
               <span className="font-bold text-red-700 text-lg">$3,789.66</span>
@@ -506,6 +547,10 @@ const MonthlyPaymentCalculator = () => {
             <div className="flex justify-between border-b border-gray-200 pb-1">
               <span className="text-gray-600">Down Payment:</span>
               <span className="font-semibold text-green-700">${downPayment.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between border-b border-gray-200 pb-1">
+              <span className="text-gray-600">Loan Amount:</span>
+              <span className="font-semibold">${totalLoanAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between border-b border-gray-200 pb-1">
               <span className="text-gray-600">Payment Frequency:</span>
@@ -526,6 +571,10 @@ const MonthlyPaymentCalculator = () => {
             <div className="flex justify-between border-b border-gray-200 pb-1">
               <span className="text-gray-600">Compounding:</span>
               <span className="font-semibold">Monthly (12x/year)</span>
+            </div>
+            <div className="flex justify-between border-b border-gray-200 pb-1">
+              <span className="text-gray-600"></span>
+              <span className="font-semibold"></span>
             </div>
             <div className="flex justify-between pt-2 col-span-2 border-t-2 border-green-400">
               <span className="font-bold text-green-700">Total Interest Paid:</span>
@@ -556,10 +605,10 @@ const MonthlyPaymentCalculator = () => {
             <div className="p-4 bg-green-600 text-white rounded-lg border-2 border-green-700">
               <div className="flex justify-between items-center mb-2">
                 <span className="font-bold text-lg">TOTAL INTEREST SAVED:</span>
-                <span className="font-bold text-2xl">${(3789.66 - totalInterest).toFixed(2)}</span>
+                <span className="font-bold text-2xl">${(dealershipTotalInterest - totalInterest).toFixed(2)}</span>
               </div>
               <div className="text-sm text-green-100 text-right font-mono">
-                $3,789.66 (Dealership) - ${totalInterest.toFixed(2)} (Your Plan) = ${(3789.66 - totalInterest).toFixed(2)}
+                ${dealershipTotalInterest.toFixed(2)} (Dealership) - ${totalInterest.toFixed(2)} (Your Plan) = ${(dealershipTotalInterest - totalInterest).toFixed(2)}
               </div>
             </div>
           </div>
@@ -581,7 +630,7 @@ const MonthlyPaymentCalculator = () => {
               const interestEarned = futureValue - extraDownPayment;
               
               // Net savings after opportunity cost
-              const grossSavings = 3789.66 - totalInterest;
+              const grossSavings = dealershipTotalInterest - totalInterest;
               const netSavings = grossSavings - interestEarned;
               
               return (
