@@ -10,6 +10,15 @@ const MonthlyPaymentCalculator = () => {
   const [registrationFee, setRegistrationFee] = useState(169.00);
   const [annualRate, setAnnualRate] = useState(7.99);
   const [months, setMonths] = useState(60);
+
+  // New scenario comparison variables
+  const [scenarioAInterestRate, setScenarioAInterestRate] = useState(7.99);
+  const [scenarioADownPayment, setScenarioADownPayment] = useState(0);
+  const [scenarioALumpsum, setScenarioALumpsum] = useState(10000);
+
+  const [scenarioBInterestRate, setScenarioBInterestRate] = useState(8.49);
+  const [scenarioBDownPayment, setScenarioBDownPayment] = useState(3000);
+  const [scenarioBLumpsum, setScenarioBLumpsum] = useState(7000);
   
   // Step-by-step calculations
   const netPrice = vehiclePrice - tradeIn;
@@ -35,7 +44,70 @@ const MonthlyPaymentCalculator = () => {
                           (Math.pow(1 + biweeklyRate, biweeklyPayments) - 1);
   const biweeklyTotalPaid = biweeklyPayment * biweeklyPayments;
   const biweeklyTotalInterest = biweeklyTotalPaid - totalLoanAmount;
-  
+
+  // Constants for scenario comparison
+  const INITIAL_PERIOD_MONTHS = 6;
+  const INITIAL_PERIOD_BIWEEKLY_PAYMENTS = 13; // 6 months * 26 payments/year / 12 months = 13 payments
+  const REMAINING_BIWEEKLY_PAYMENTS = 130 - INITIAL_PERIOD_BIWEEKLY_PAYMENTS; // 117 remaining payments
+
+  // Scenario A Calculations (Zero down, 7.99%, $10k lumpsum after 6 months)
+  const scenarioAAmountFinanced = totalPurchasePrice - scenarioADownPayment;
+  const scenarioATotalLoanAmount = scenarioAAmountFinanced + registrationFee;
+  const scenarioABiweeklyRate = scenarioAInterestRate / 100 / 26;
+
+  // Calculate initial 13 bi-weekly payments
+  const scenarioAInitialPayment = scenarioATotalLoanAmount * (scenarioABiweeklyRate * Math.pow(1 + scenarioABiweeklyRate, 130)) /
+                                   (Math.pow(1 + scenarioABiweeklyRate, 130) - 1);
+
+  // Balance after 13 payments
+  let scenarioABalance = scenarioATotalLoanAmount;
+  for (let i = 0; i < INITIAL_PERIOD_BIWEEKLY_PAYMENTS; i++) {
+    const interestPayment = scenarioABalance * scenarioABiweeklyRate;
+    const principalPayment = scenarioAInitialPayment - interestPayment;
+    scenarioABalance -= principalPayment;
+  }
+
+  // Apply lumpsum payment
+  const scenarioABalanceAfterLumpsum = scenarioABalance - scenarioALumpsum;
+
+  // Calculate remaining payments for reduced balance
+  const scenarioARemainingPayment = scenarioABalanceAfterLumpsum * (scenarioABiweeklyRate * Math.pow(1 + scenarioABiweeklyRate, REMAINING_BIWEEKLY_PAYMENTS)) /
+                                    (Math.pow(1 + scenarioABiweeklyRate, REMAINING_BIWEEKLY_PAYMENTS) - 1);
+
+  const scenarioATotalPaid = (scenarioAInitialPayment * INITIAL_PERIOD_BIWEEKLY_PAYMENTS) +
+                             scenarioALumpsum +
+                             (scenarioARemainingPayment * REMAINING_BIWEEKLY_PAYMENTS);
+  const scenarioATotalInterest = scenarioATotalPaid - scenarioATotalLoanAmount;
+
+  // Scenario B Calculations ($3k down, 8.49%, $7k lumpsum after 6 months)
+  const scenarioBAmountFinanced = totalPurchasePrice - scenarioBDownPayment;
+  const scenarioBTotalLoanAmount = scenarioBAmountFinanced + registrationFee;
+  const scenarioBBiweeklyRate = scenarioBInterestRate / 100 / 26;
+
+  // Calculate initial 13 bi-weekly payments
+  const scenarioBInitialPayment = scenarioBTotalLoanAmount * (scenarioBBiweeklyRate * Math.pow(1 + scenarioBBiweeklyRate, 130)) /
+                                   (Math.pow(1 + scenarioBBiweeklyRate, 130) - 1);
+
+  // Balance after 13 payments
+  let scenarioBBalance = scenarioBTotalLoanAmount;
+  for (let i = 0; i < INITIAL_PERIOD_BIWEEKLY_PAYMENTS; i++) {
+    const interestPayment = scenarioBBalance * scenarioBBiweeklyRate;
+    const principalPayment = scenarioBInitialPayment - interestPayment;
+    scenarioBBalance -= principalPayment;
+  }
+
+  // Apply lumpsum payment
+  const scenarioBBalanceAfterLumpsum = scenarioBBalance - scenarioBLumpsum;
+
+  // Calculate remaining payments for reduced balance
+  const scenarioBRemainingPayment = scenarioBBalanceAfterLumpsum * (scenarioBBiweeklyRate * Math.pow(1 + scenarioBBiweeklyRate, REMAINING_BIWEEKLY_PAYMENTS)) /
+                                    (Math.pow(1 + scenarioBBiweeklyRate, REMAINING_BIWEEKLY_PAYMENTS) - 1);
+
+  const scenarioBTotalPaid = (scenarioBInitialPayment * INITIAL_PERIOD_BIWEEKLY_PAYMENTS) +
+                             scenarioBLumpsum +
+                             (scenarioBRemainingPayment * REMAINING_BIWEEKLY_PAYMENTS);
+  const scenarioBTotalInterest = scenarioBTotalPaid - scenarioBTotalLoanAmount;
+
   // DEALERSHIP'S ORIGINAL OFFER (for separate comparison)
   const dealershipDownPayment = 3042.00;
   const dealershipLoanAmount = 17664.94;
@@ -439,6 +511,323 @@ const MonthlyPaymentCalculator = () => {
                 )}
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* NEW: Financing Strategy Comparison */}
+      <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-400 rounded-lg shadow-lg">
+        <h2 className="text-xl font-bold mb-4 text-purple-800 flex items-center gap-2">
+          🎯 Finance Strategy Comparison: Which Option Saves More?
+        </h2>
+
+        <p className="text-sm text-gray-700 mb-6 bg-white p-4 rounded border-l-4 border-purple-400">
+          <strong>Your Dilemma:</strong> Should you put zero down with 7.99% interest and pay $10k after 6 months,
+          or put $3k down with 8.49% interest and pay $7k after 6 months? Let's find out which saves more money!
+        </p>
+
+        {/* Input Controls for Scenarios */}
+        <div className="mb-6 p-4 bg-white rounded-lg border border-purple-300">
+          <h3 className="font-semibold text-purple-700 mb-3">Adjust Scenario Variables</h3>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Scenario A Controls */}
+            <div className="p-3 bg-red-50 rounded border border-red-300">
+              <h4 className="font-semibold text-red-700 mb-2">Scenario A (Zero Down)</h4>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Interest Rate (%)</label>
+                  <input
+                    type="number"
+                    value={scenarioAInterestRate}
+                    onChange={(e) => setScenarioAInterestRate(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Down Payment</label>
+                  <input
+                    type="number"
+                    value={scenarioADownPayment}
+                    onChange={(e) => setScenarioADownPayment(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Lumpsum After 6 Months</label>
+                  <input
+                    type="number"
+                    value={scenarioALumpsum}
+                    onChange={(e) => setScenarioALumpsum(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Scenario B Controls */}
+            <div className="p-3 bg-blue-50 rounded border border-blue-300">
+              <h4 className="font-semibold text-blue-700 mb-2">Scenario B ($3k Down)</h4>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Interest Rate (%)</label>
+                  <input
+                    type="number"
+                    value={scenarioBInterestRate}
+                    onChange={(e) => setScenarioBInterestRate(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Down Payment</label>
+                  <input
+                    type="number"
+                    value={scenarioBDownPayment}
+                    onChange={(e) => setScenarioBDownPayment(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600">Lumpsum After 6 Months</label>
+                  <input
+                    type="number"
+                    value={scenarioBLumpsum}
+                    onChange={(e) => setScenarioBLumpsum(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
+                    step="100"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Comparison */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Scenario A Details */}
+          <div className="p-5 bg-red-50 border-2 border-red-400 rounded-lg">
+            <h3 className="font-bold text-red-800 mb-4 text-lg flex items-center gap-2">
+              🅰️ Scenario A: Zero Down + 7.99%
+            </h3>
+            <div className="space-y-3 text-sm">
+              <div className="p-3 bg-white rounded border border-red-200">
+                <h4 className="font-semibold text-gray-700 mb-2">Initial Setup</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Down Payment:</span>
+                    <span className="font-semibold">${scenarioADownPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Loan Amount:</span>
+                    <span className="font-semibold">${scenarioATotalLoanAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Interest Rate:</span>
+                    <span className="font-semibold">{scenarioAInterestRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-red-200">
+                <h4 className="font-semibold text-gray-700 mb-2">First 6 Months (13 payments)</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Bi-weekly Payment:</span>
+                    <span className="font-semibold">${scenarioAInitialPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining Balance:</span>
+                    <span className="font-semibold">${scenarioABalance.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-red-200">
+                <h4 className="font-semibold text-gray-700 mb-2">After Lumpsum Payment</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Lumpsum Payment:</span>
+                    <span className="font-semibold text-green-600">${scenarioALumpsum.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>New Balance:</span>
+                    <span className="font-semibold">${scenarioABalanceAfterLumpsum.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>New Bi-weekly Payment:</span>
+                    <span className="font-semibold">${scenarioARemainingPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining Payments:</span>
+                    <span className="font-semibold">{REMAINING_BIWEEKLY_PAYMENTS}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-red-100 rounded border-2 border-red-400">
+                <h4 className="font-bold text-red-700 mb-2">Total Costs</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Total Amount Paid:</span>
+                    <span className="font-bold">${scenarioATotalPaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-bold">Total Interest:</span>
+                    <span className="font-bold text-red-700 text-lg">${scenarioATotalInterest.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Scenario B Details */}
+          <div className="p-5 bg-blue-50 border-2 border-blue-400 rounded-lg">
+            <h3 className="font-bold text-blue-800 mb-4 text-lg flex items-center gap-2">
+              🅱️ Scenario B: $3k Down + 8.49%
+            </h3>
+            <div className="space-y-3 text-sm">
+              <div className="p-3 bg-white rounded border border-blue-200">
+                <h4 className="font-semibold text-gray-700 mb-2">Initial Setup</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Down Payment:</span>
+                    <span className="font-semibold">${scenarioBDownPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Loan Amount:</span>
+                    <span className="font-semibold">${scenarioBTotalLoanAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Interest Rate:</span>
+                    <span className="font-semibold">{scenarioBInterestRate}%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-blue-200">
+                <h4 className="font-semibold text-gray-700 mb-2">First 6 Months (13 payments)</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Bi-weekly Payment:</span>
+                    <span className="font-semibold">${scenarioBInitialPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining Balance:</span>
+                    <span className="font-semibold">${scenarioBBalance.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-blue-200">
+                <h4 className="font-semibold text-gray-700 mb-2">After Lumpsum Payment</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Lumpsum Payment:</span>
+                    <span className="font-semibold text-green-600">${scenarioBLumpsum.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>New Balance:</span>
+                    <span className="font-semibold">${scenarioBBalanceAfterLumpsum.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>New Bi-weekly Payment:</span>
+                    <span className="font-semibold">${scenarioBRemainingPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Remaining Payments:</span>
+                    <span className="font-semibold">{REMAINING_BIWEEKLY_PAYMENTS}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-blue-100 rounded border-2 border-blue-400">
+                <h4 className="font-bold text-blue-700 mb-2">Total Costs</h4>
+                <div className="space-y-1">
+                  <div className="flex justify-between">
+                    <span>Total Amount Paid:</span>
+                    <span className="font-bold">${scenarioBTotalPaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-bold">Total Interest:</span>
+                    <span className="font-bold text-blue-700 text-lg">${scenarioBTotalInterest.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Winner Declaration */}
+        <div className={`p-6 rounded-lg border-2 ${
+          scenarioATotalInterest < scenarioBTotalInterest
+            ? 'bg-gradient-to-r from-green-100 to-green-50 border-green-500'
+            : 'bg-gradient-to-r from-yellow-100 to-yellow-50 border-yellow-500'
+        }`}>
+          <h3 className={`font-bold text-xl mb-4 flex items-center gap-2 ${
+            scenarioATotalInterest < scenarioBTotalInterest ? 'text-green-800' : 'text-yellow-800'
+          }`}>
+            🏆 THE WINNER: {scenarioATotalInterest < scenarioBTotalInterest ? 'Scenario A (Zero Down)' : 'Scenario B ($3k Down)'}
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="p-4 bg-white rounded border border-gray-300">
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Interest Difference</div>
+                <div className="text-2xl font-bold text-purple-700">
+                  ${Math.abs(scenarioATotalInterest - scenarioBTotalInterest).toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {scenarioATotalInterest < scenarioBTotalInterest ? 'Scenario A saves' : 'Scenario B saves'}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white rounded border border-gray-300">
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Down Payment Difference</div>
+                <div className="text-2xl font-bold text-orange-700">
+                  ${Math.abs(scenarioADownPayment - scenarioBDownPayment).toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {scenarioADownPayment < scenarioBDownPayment ? 'A pays less upfront' : 'B pays less upfront'}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-white rounded border border-gray-300">
+              <div className="text-center">
+                <div className="text-sm text-gray-600">Total Cash Difference</div>
+                <div className="text-2xl font-bold text-indigo-700">
+                  ${Math.abs((scenarioATotalPaid + scenarioADownPayment) - (scenarioBTotalPaid + scenarioBDownPayment)).toFixed(2)}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {(scenarioATotalPaid + scenarioADownPayment) < (scenarioBTotalPaid + scenarioBDownPayment) ? 'A saves total' : 'B saves total'}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded border border-gray-300">
+            <h4 className="font-semibold text-gray-800 mb-2">💡 Economic Analysis:</h4>
+            <p className="text-sm text-gray-700">
+              {scenarioATotalInterest < scenarioBTotalInterest ? (
+                <>
+                  <strong>Scenario A is the better choice!</strong> Even with zero down payment and the same interest rate initially,
+                  you save <strong>${(scenarioBTotalInterest - scenarioATotalInterest).toFixed(2)}</strong> in total interest.
+                  The larger lumpsum payment of ${scenarioALumpsum.toFixed(2)} after 6 months more than compensates for the smaller down payment.
+                </>
+              ) : (
+                <>
+                  <strong>Scenario B is the better choice!</strong> The combination of a larger down payment and the ability to make
+                  a lumpsum payment results in <strong>${(scenarioATotalInterest - scenarioBTotalInterest).toFixed(2)}</strong> less total interest,
+                  despite the higher interest rate of {scenarioBInterestRate}%.
+                </>
+              )}
+            </p>
           </div>
         </div>
       </div>
