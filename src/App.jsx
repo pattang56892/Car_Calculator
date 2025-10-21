@@ -606,6 +606,233 @@ const MonthlyPaymentCalculator = () => {
           </div>
         </div>
 
+        {/* Excel-Style Calculation Tables */}
+        <div className="mb-6">
+          <h3 className="font-bold text-purple-800 mb-4 text-lg">📊 Step-by-Step Excel Calculations</h3>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Scenario A Excel Table */}
+            <div className="overflow-x-auto border-2 border-red-300 rounded-lg shadow-lg">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-red-600">
+                    <th className="border border-gray-300 px-2 py-2 text-white font-bold w-8">Row</th>
+                    <th className="border border-gray-300 px-3 py-2 text-left text-white font-bold">Scenario A Description</th>
+                    <th className="border border-gray-300 px-3 py-2 text-left text-white font-bold w-24">Formula</th>
+                    <th className="border border-gray-300 px-3 py-2 text-right text-white font-bold w-32">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono text-xs">
+                  <tr className="bg-red-100">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center">1</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold" colSpan="3">
+                      SCENARIO A: ZERO DOWN + 7.99% + $10K LUMPSUM
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">2</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">3</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Down Payment</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">${scenarioADownPayment.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">4</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Total Loan Amount</td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-700 font-semibold">=D8-D3+D12</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">${scenarioATotalLoanAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">5</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Annual Interest Rate</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{scenarioAInterestRate.toFixed(2)}%</td>
+                  </tr>
+                  <tr className="bg-blue-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">6</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Bi-weekly Rate</td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-700 font-semibold">=D5/100/26</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{(scenarioABiweeklyRate * 100).toFixed(6)}%</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">7</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-green-100 border-2 border-green-500">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">8</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-green-800">
+                      Initial Bi-weekly Payment
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-800 font-bold">=PMT(D6,130,-D4)</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-green-800">
+                      ${scenarioAInitialPayment.toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">9</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Payments for 6 months</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">13 payments</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{INITIAL_PERIOD_BIWEEKLY_PAYMENTS}</td>
+                  </tr>
+                  <tr className="bg-orange-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">10</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold">Balance after 6 months</td>
+                    <td className="border border-gray-300 px-3 py-2 text-orange-700 font-semibold">Amortization</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold">${scenarioABalance.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">11</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Lumpsum Payment</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right text-purple-600 font-bold">${scenarioALumpsum.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-purple-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">12</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold">New Balance</td>
+                    <td className="border border-gray-300 px-3 py-2 text-purple-700 font-semibold">=D10-D11</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold">${scenarioABalanceAfterLumpsum.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">13</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-blue-100 border-2 border-blue-500">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">14</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-blue-800">
+                      New Bi-weekly Payment
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-blue-800 font-bold">=PMT(D6,117,-D12)</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-blue-800">
+                      ${scenarioARemainingPayment.toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr className="bg-red-100">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">15</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-red-700">Total Interest Paid</td>
+                    <td className="border border-gray-300 px-3 py-2 text-red-700 font-semibold">Complex calc</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-red-700 text-base">
+                      ${scenarioATotalInterest.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* Scenario B Excel Table */}
+            <div className="overflow-x-auto border-2 border-blue-300 rounded-lg shadow-lg">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-blue-600">
+                    <th className="border border-gray-300 px-2 py-2 text-white font-bold w-8">Row</th>
+                    <th className="border border-gray-300 px-3 py-2 text-left text-white font-bold">Scenario B Description</th>
+                    <th className="border border-gray-300 px-3 py-2 text-left text-white font-bold w-24">Formula</th>
+                    <th className="border border-gray-300 px-3 py-2 text-right text-white font-bold w-32">Amount</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono text-xs">
+                  <tr className="bg-blue-100">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center">1</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold" colSpan="3">
+                      SCENARIO B: $3K DOWN + 8.49% + $7K LUMPSUM
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">2</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-orange-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">3</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Down Payment</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">${scenarioBDownPayment.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-orange-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">4</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Total Loan Amount</td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-700 font-semibold">=D8-D3+D12</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">${scenarioBTotalLoanAmount.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-orange-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">5</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Annual Interest Rate</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{scenarioBInterestRate.toFixed(2)}%</td>
+                  </tr>
+                  <tr className="bg-orange-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">6</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Bi-weekly Rate</td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-700 font-semibold">=D5/100/26</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{(scenarioBBiweeklyRate * 100).toFixed(6)}%</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">7</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-green-100 border-2 border-green-500">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">8</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-green-800">
+                      Initial Bi-weekly Payment
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-green-800 font-bold">=PMT(D6,130,-D4)</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-green-800">
+                      ${scenarioBInitialPayment.toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">9</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Payments for 6 months</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">13 payments</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right">{INITIAL_PERIOD_BIWEEKLY_PAYMENTS}</td>
+                  </tr>
+                  <tr className="bg-yellow-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">10</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold">Balance after 6 months</td>
+                    <td className="border border-gray-300 px-3 py-2 text-yellow-700 font-semibold">Amortization</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold">${scenarioBBalance.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-indigo-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">11</td>
+                    <td className="border border-gray-300 px-3 py-2 font-semibold">Lumpsum Payment</td>
+                    <td className="border border-gray-300 px-3 py-2 text-gray-600">Input</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right text-indigo-600 font-bold">${scenarioBLumpsum.toFixed(2)}</td>
+                  </tr>
+                  <tr className="bg-indigo-50">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">12</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold">New Balance</td>
+                    <td className="border border-gray-300 px-3 py-2 text-indigo-700 font-semibold">=D10-D11</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold">${scenarioBBalanceAfterLumpsum.toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">13</td>
+                    <td className="border border-gray-300 px-3 py-2" colSpan="3"></td>
+                  </tr>
+                  <tr className="bg-purple-100 border-2 border-purple-500">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">14</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-purple-800">
+                      New Bi-weekly Payment
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-purple-800 font-bold">=PMT(D6,117,-D12)</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-purple-800">
+                      ${scenarioBRemainingPayment.toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr className="bg-blue-100">
+                    <td className="border border-gray-300 px-2 py-2 font-bold text-center bg-gray-100">15</td>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-blue-700">Total Interest Paid</td>
+                    <td className="border border-gray-300 px-3 py-2 text-blue-700 font-semibold">Complex calc</td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-bold text-blue-700 text-base">
+                      ${scenarioBTotalInterest.toFixed(2)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         {/* Detailed Comparison */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Scenario A Details */}
@@ -828,6 +1055,101 @@ const MonthlyPaymentCalculator = () => {
                 </>
               )}
             </p>
+          </div>
+        </div>
+
+        {/* Scenario Formula Reference */}
+        <div className="mt-6 p-6 bg-purple-50 border-2 border-purple-300 rounded-lg">
+          <h3 className="font-bold text-purple-800 mb-4 text-lg">🧮 Scenario Calculation Formulas Reference</h3>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Key Formulas */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-purple-700 mb-3">Essential PMT Formulas</h4>
+
+              <div className="p-3 bg-white rounded border border-purple-200">
+                <p className="text-sm font-semibold text-gray-700 mb-2">1. Initial Bi-weekly Payment (Row 8):</p>
+                <code className="block bg-gray-100 p-2 rounded text-xs font-mono">=PMT(rate, nper, -pv)</code>
+                <div className="text-xs text-gray-600 mt-1">
+                  <div><strong>rate:</strong> Bi-weekly interest rate (Annual Rate ÷ 100 ÷ 26)</div>
+                  <div><strong>nper:</strong> Total number of bi-weekly payments (130)</div>
+                  <div><strong>pv:</strong> Present value (Total Loan Amount)</div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-purple-200">
+                <p className="text-sm font-semibold text-gray-700 mb-2">2. Balance After 6 Months (Row 10):</p>
+                <code className="block bg-gray-100 p-2 rounded text-xs font-mono">Amortization Schedule Loop</code>
+                <div className="text-xs text-gray-600 mt-1">
+                  For each of 13 payments:<br/>
+                  Interest = Balance × Bi-weekly Rate<br/>
+                  Principal = Payment - Interest<br/>
+                  New Balance = Old Balance - Principal
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-purple-200">
+                <p className="text-sm font-semibold text-gray-700 mb-2">3. New Payment After Lumpsum (Row 14):</p>
+                <code className="block bg-gray-100 p-2 rounded text-xs font-mono">=PMT(rate, 117, -new_balance)</code>
+                <div className="text-xs text-gray-600 mt-1">
+                  <div><strong>rate:</strong> Same bi-weekly rate</div>
+                  <div><strong>117:</strong> Remaining payments (130 - 13)</div>
+                  <div><strong>new_balance:</strong> Balance after lumpsum (Row 12)</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Specific Examples */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-purple-700 mb-3">Current Calculation Examples</h4>
+
+              <div className="p-3 bg-red-50 rounded border border-red-300">
+                <p className="text-sm font-semibold text-red-700 mb-2">Scenario A (Zero Down) Examples:</p>
+                <div className="text-xs font-mono space-y-1">
+                  <div>Bi-weekly Rate: {scenarioAInterestRate}% ÷ 100 ÷ 26 = {(scenarioABiweeklyRate * 100).toFixed(6)}%</div>
+                  <div>Initial Payment: PMT({(scenarioABiweeklyRate * 100).toFixed(6)}%, 130, -{scenarioATotalLoanAmount.toFixed(2)})</div>
+                  <div>Result: ${scenarioAInitialPayment.toFixed(2)}</div>
+                  <div className="mt-2 pt-2 border-t border-red-200">
+                    After Lumpsum: PMT({(scenarioABiweeklyRate * 100).toFixed(6)}%, 117, -{scenarioABalanceAfterLumpsum.toFixed(2)})
+                  </div>
+                  <div>Result: ${scenarioARemainingPayment.toFixed(2)}</div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-blue-50 rounded border border-blue-300">
+                <p className="text-sm font-semibold text-blue-700 mb-2">Scenario B ($3k Down) Examples:</p>
+                <div className="text-xs font-mono space-y-1">
+                  <div>Bi-weekly Rate: {scenarioBInterestRate}% ÷ 100 ÷ 26 = {(scenarioBBiweeklyRate * 100).toFixed(6)}%</div>
+                  <div>Initial Payment: PMT({(scenarioBBiweeklyRate * 100).toFixed(6)}%, 130, -{scenarioBTotalLoanAmount.toFixed(2)})</div>
+                  <div>Result: ${scenarioBInitialPayment.toFixed(2)}</div>
+                  <div className="mt-2 pt-2 border-t border-blue-200">
+                    After Lumpsum: PMT({(scenarioBBiweeklyRate * 100).toFixed(6)}%, 117, -{scenarioBBalanceAfterLumpsum.toFixed(2)})
+                  </div>
+                  <div>Result: ${scenarioBRemainingPayment.toFixed(2)}</div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-green-50 rounded border border-green-300">
+                <p className="text-sm font-semibold text-green-700 mb-2">Key Constants:</p>
+                <div className="text-xs font-mono space-y-1">
+                  <div>6 months = 13 bi-weekly payments</div>
+                  <div>Remaining payments = 130 - 13 = 117</div>
+                  <div>26 bi-weekly periods per year</div>
+                  <div>Total term = 5 years = 130 payments</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 bg-white rounded border border-purple-300">
+            <h4 className="font-semibold text-purple-800 mb-2">💡 Excel Implementation Tips:</h4>
+            <div className="text-sm text-gray-700 space-y-1">
+              <div>• Use <code className="bg-gray-100 px-1 rounded">PMT(rate, nper, pv, [fv], [type])</code> function for payment calculations</div>
+              <div>• Create an amortization table to track balance changes over the first 13 payments</div>
+              <div>• Remember: PMT returns negative values, so use negative present value or multiply result by -1</div>
+              <div>• Use absolute references ($) when copying formulas across cells</div>
+              <div>• The "Complex calc" for total interest includes all payments minus principal</div>
+            </div>
           </div>
         </div>
       </div>
