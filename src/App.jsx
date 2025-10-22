@@ -19,7 +19,13 @@ const MonthlyPaymentCalculator = () => {
   const [scenarioBInterestRate, setScenarioBInterestRate] = useState(8.49);
   const [scenarioBDownPayment, setScenarioBDownPayment] = useState(3000);
   const [scenarioBLumpsum, setScenarioBLumpsum] = useState(7000);
-  
+
+  // Scenario C variables (Pay in full: GIC + PLC)
+  const [scenarioCGicAmount, setScenarioCGicAmount] = useState(10000);
+  const [scenarioCGicOpportunityCost, setScenarioCGicOpportunityCost] = useState(2.5);
+  const [scenarioCPlcInterestRate, setScenarioCPlcInterestRate] = useState(9.21);
+  const [scenarioCInsuranceSavings, setScenarioCInsuranceSavings] = useState(2500);
+
   // Step-by-step calculations
   const netPrice = vehiclePrice - tradeIn;
   const hstAmount = netPrice * (hstRate / 100);
@@ -108,6 +114,26 @@ const MonthlyPaymentCalculator = () => {
                              (scenarioBRemainingPayment * REMAINING_BIWEEKLY_PAYMENTS);
   const scenarioBTotalInterest = scenarioBTotalPaid - scenarioBTotalLoanAmount;
 
+  // Scenario C Calculations (Pay in Full: GIC + PLC)
+  // No contract registration fee since paying in full (not financing with dealership)
+  const scenarioCTotalPurchasePrice = totalPurchasePrice; // Same base amount
+
+  // GIC opportunity cost over 5 years
+  const scenarioCGicFutureValue = scenarioCGicAmount * Math.pow(1 + scenarioCGicOpportunityCost / 100, 5);
+  const scenarioCGicOpportunityCostTotal = scenarioCGicFutureValue - scenarioCGicAmount;
+
+  // PLC financing for remaining amount
+  const scenarioCPlcAmount = scenarioCTotalPurchasePrice - scenarioCGicAmount;
+  const scenarioCPlcBiweeklyRate = scenarioCPlcInterestRate / 100 / 26;
+  const scenarioCPlcBiweeklyPayment = scenarioCPlcAmount * (scenarioCPlcBiweeklyRate * Math.pow(1 + scenarioCPlcBiweeklyRate, 130)) /
+                                       (Math.pow(1 + scenarioCPlcBiweeklyRate, 130) - 1);
+  const scenarioCPlcTotalPaid = scenarioCPlcBiweeklyPayment * 130;
+  const scenarioCPlcInterestPaid = scenarioCPlcTotalPaid - scenarioCPlcAmount;
+
+  // Total cost for Scenario C (including opportunity cost, minus insurance savings)
+  const scenarioCTotalCost = scenarioCGicAmount + scenarioCGicOpportunityCostTotal + scenarioCPlcTotalPaid - scenarioCInsuranceSavings;
+  const scenarioCEffectiveInterest = scenarioCGicOpportunityCostTotal + scenarioCPlcInterestPaid - scenarioCInsuranceSavings;
+
   // DEALERSHIP'S ORIGINAL OFFER (for separate comparison)
   const dealershipDownPayment = 3042.00;
   const dealershipLoanAmount = 17664.94;
@@ -163,7 +189,36 @@ const MonthlyPaymentCalculator = () => {
       ['Extra Down Payment', extraDownPayment.toFixed(2)],
       ['Investment Rate', '2.5% annually'],
       ['Potential Interest Earned (5 years)', interestEarned.toFixed(2)],
-      ['Net Savings (After Opportunity Cost)', netSavings.toFixed(2)]
+      ['Net Savings (After Opportunity Cost)', netSavings.toFixed(2)],
+      [],
+      ['SCENARIO COMPARISON WITH INSURANCE IMPACT'],
+      [],
+      ['SCENARIO A (Finance with Dealership)'],
+      ['Down Payment', scenarioADownPayment.toFixed(2)],
+      ['Interest Rate', scenarioAInterestRate + '%'],
+      ['Lumpsum after 6 months', scenarioALumpsum.toFixed(2)],
+      ['Total Interest Paid', scenarioATotalInterest.toFixed(2)],
+      ['Total Paid (Financing)', scenarioATotalPaid.toFixed(2)],
+      ['Extra Insurance Cost', scenarioCInsuranceSavings.toFixed(2)],
+      ['TOTAL COST (with Insurance)', (scenarioATotalPaid + scenarioCInsuranceSavings).toFixed(2)],
+      [],
+      ['SCENARIO C (Pay in Full: GIC + PLC)'],
+      ['GIC Amount', scenarioCGicAmount.toFixed(2)],
+      ['GIC Opportunity Cost Rate', scenarioCGicOpportunityCost + '%'],
+      ['GIC Opportunity Cost Total', scenarioCGicOpportunityCostTotal.toFixed(2)],
+      ['PLC Financed Amount', scenarioCPlcAmount.toFixed(2)],
+      ['PLC Interest Rate', scenarioCPlcInterestRate + '%'],
+      ['PLC Bi-weekly Payment', scenarioCPlcBiweeklyPayment.toFixed(2)],
+      ['PLC Total Paid', scenarioCPlcTotalPaid.toFixed(2)],
+      ['PLC Interest Paid', scenarioCPlcInterestPaid.toFixed(2)],
+      ['Insurance Savings', scenarioCInsuranceSavings.toFixed(2)],
+      ['TOTAL COST (GIC + PLC - Insurance)', scenarioCTotalCost.toFixed(2)],
+      [],
+      ['COMPARISON'],
+      ['Scenario A Total Cost', (scenarioATotalPaid + scenarioCInsuranceSavings).toFixed(2)],
+      ['Scenario C Total Cost', scenarioCTotalCost.toFixed(2)],
+      ['Savings with Scenario C', Math.abs((scenarioATotalPaid + scenarioCInsuranceSavings) - scenarioCTotalCost).toFixed(2)],
+      ['Winner', scenarioCTotalCost < (scenarioATotalPaid + scenarioCInsuranceSavings) ? 'Scenario C' : 'Scenario A']
     ].map(row => row.join(',')).join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -260,6 +315,46 @@ const MonthlyPaymentCalculator = () => {
               onChange={(e) => setMonths(parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500"
               step="1"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">HST Rate (%)</label>
+            <input
+              type="number"
+              value={hstRate}
+              onChange={(e) => setHstRate(parseFloat(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+              step="0.01"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Licence Fee</label>
+            <input
+              type="number"
+              value={licenceFee}
+              onChange={(e) => setLicenceFee(parseFloat(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+              step="0.01"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Annual Interest Rate (%)</label>
+            <input
+              type="number"
+              value={annualRate}
+              onChange={(e) => setAnnualRate(parseFloat(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+              step="0.01"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Contract Registration Fee</label>
+            <input
+              type="number"
+              value={registrationFee}
+              onChange={(e) => setRegistrationFee(parseFloat(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500"
+              step="0.01"
             />
           </div>
         </div>
@@ -1150,6 +1245,253 @@ const MonthlyPaymentCalculator = () => {
               <div>• Use absolute references ($) when copying formulas across cells</div>
               <div>• The "Complex calc" for total interest includes all payments minus principal</div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Insurance Cost Impact Analysis */}
+      <div className="mt-8 p-6 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-400 rounded-lg shadow-lg">
+        <h2 className="text-xl font-bold mb-4 text-emerald-900 flex items-center gap-2">
+          🛡️ Insurance Cost Impact: Scenario A vs Scenario C (Pay in Full)
+        </h2>
+
+        <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+          <p className="text-sm text-yellow-900">
+            <strong>Key Insight:</strong> Financing any amount requires full insurance coverage, costing an additional
+            <strong> ${(scenarioCInsuranceSavings / 5).toFixed(2)}/year</strong> for 5 years =
+            <strong> ${scenarioCInsuranceSavings.toFixed(2)} total</strong>.
+            Paying in full allows basic insurance, making Scenario C potentially more attractive despite higher interest rates.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Scenario A */}
+          <div className="p-6 bg-white border-2 border-red-400 rounded-lg shadow-md">
+            <h3 className="font-bold text-red-800 mb-4 text-lg flex items-center gap-2">
+              📊 Scenario A (Previous Winner)
+              <span className="text-xs font-normal text-gray-600">(Finance with Dealership)</span>
+            </h3>
+
+            <div className="space-y-3 text-sm">
+              <div className="p-3 bg-red-50 rounded border border-red-200">
+                <div className="font-semibold text-red-700 mb-2">Financing Details:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>Down Payment:</span>
+                    <span className="font-mono">${scenarioADownPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Interest Rate:</span>
+                    <span className="font-mono">{scenarioAInterestRate}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Lumpsum (after 6 mo):</span>
+                    <span className="font-mono">${scenarioALumpsum.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Initial Bi-weekly Payment:</span>
+                    <span className="font-mono">${scenarioAInitialPayment.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>After Lumpsum Payment:</span>
+                    <span className="font-mono">${scenarioARemainingPayment.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-red-300">
+                <div className="font-semibold text-gray-800 mb-2">Cost Breakdown:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>Total Loan Amount:</span>
+                    <span className="font-mono">${scenarioATotalLoanAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Interest Paid:</span>
+                    <span className="font-mono text-red-600">${scenarioATotalInterest.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-300 pt-1 mt-1">
+                    <span className="font-semibold">Total Paid (Financing):</span>
+                    <span className="font-mono font-semibold">${scenarioATotalPaid.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-red-100 rounded border-2 border-red-500">
+                <div className="font-bold text-red-800 mb-2">Insurance Cost Impact:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>Extra Insurance Cost:</span>
+                    <span className="font-mono text-red-700 font-bold">+${scenarioCInsuranceSavings.toFixed(2)}</span>
+                  </div>
+                  <div className="text-xs text-gray-600 italic mt-1">
+                    (Full insurance required for financed vehicles)
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-red-200 rounded-lg border-2 border-red-600">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-red-900">TOTAL COST:</span>
+                  <span className="font-bold text-xl text-red-900">
+                    ${(scenarioATotalPaid + scenarioCInsuranceSavings).toFixed(2)}
+                  </span>
+                </div>
+                <div className="text-xs text-red-800 mt-1">
+                  (Financing + Insurance)
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Scenario C */}
+          <div className="p-6 bg-white border-2 border-emerald-500 rounded-lg shadow-md">
+            <h3 className="font-bold text-emerald-800 mb-4 text-lg flex items-center gap-2">
+              🏆 Scenario C (Pay in Full)
+              <span className="text-xs font-normal text-gray-600">(GIC + PLC)</span>
+            </h3>
+
+            <div className="space-y-3 text-sm">
+              <div className="p-3 bg-emerald-50 rounded border border-emerald-200">
+                <div className="font-semibold text-emerald-700 mb-2">Payment Strategy:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>Total Purchase Price:</span>
+                    <span className="font-mono">${scenarioCTotalPurchasePrice.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>From GIC (Emergency Fund):</span>
+                    <span className="font-mono">${scenarioCGicAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GIC Opportunity Cost ({scenarioCGicOpportunityCost}%):</span>
+                    <span className="font-mono text-orange-600">+${scenarioCGicOpportunityCostTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-emerald-200 pt-1 mt-1">
+                    <span>Financed via PLC:</span>
+                    <span className="font-mono">${scenarioCPlcAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>PLC Interest Rate:</span>
+                    <span className="font-mono">{scenarioCPlcInterestRate}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-xs italic">(CIBC Prime 4.7% + 4.51%)</span>
+                    <span></span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>PLC Bi-weekly Payment:</span>
+                    <span className="font-mono">${scenarioCPlcBiweeklyPayment.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-white rounded border border-emerald-300">
+                <div className="font-semibold text-gray-800 mb-2">Cost Breakdown:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>PLC Total Paid:</span>
+                    <span className="font-mono">${scenarioCPlcTotalPaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>PLC Interest Paid:</span>
+                    <span className="font-mono text-orange-600">${scenarioCPlcInterestPaid.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>GIC Opportunity Cost:</span>
+                    <span className="font-mono text-orange-600">${scenarioCGicOpportunityCostTotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-300 pt-1 mt-1">
+                    <span className="font-semibold">Effective Interest Cost:</span>
+                    <span className="font-mono font-semibold text-orange-700">
+                      ${(scenarioCPlcInterestPaid + scenarioCGicOpportunityCostTotal).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3 bg-emerald-100 rounded border-2 border-emerald-500">
+                <div className="font-bold text-emerald-800 mb-2">Insurance Savings:</div>
+                <div className="space-y-1 text-xs">
+                  <div className="flex justify-between">
+                    <span>Insurance Savings:</span>
+                    <span className="font-mono text-emerald-700 font-bold">-${scenarioCInsuranceSavings.toFixed(2)}</span>
+                  </div>
+                  <div className="text-xs text-gray-600 italic mt-1">
+                    (Basic insurance sufficient - no financing)
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-emerald-200 rounded-lg border-2 border-emerald-600">
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-emerald-900">TOTAL COST:</span>
+                  <span className="font-bold text-xl text-emerald-900">
+                    ${scenarioCTotalCost.toFixed(2)}
+                  </span>
+                </div>
+                <div className="text-xs text-emerald-800 mt-1">
+                  (GIC + PLC - Insurance Savings)
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Winner Declaration */}
+        <div className="mt-6 p-5 bg-white rounded-lg border-4 border-emerald-500 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h4 className="font-bold text-lg text-emerald-900 mb-2">💰 Bottom Line Comparison:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div className="p-3 bg-red-50 rounded border border-red-300">
+                  <div className="text-gray-600 text-xs mb-1">Scenario A Total Cost:</div>
+                  <div className="font-bold text-red-700 text-lg">
+                    ${(scenarioATotalPaid + scenarioCInsuranceSavings).toFixed(2)}
+                  </div>
+                </div>
+                <div className="p-3 bg-emerald-50 rounded border border-emerald-300">
+                  <div className="text-gray-600 text-xs mb-1">Scenario C Total Cost:</div>
+                  <div className="font-bold text-emerald-700 text-lg">
+                    ${scenarioCTotalCost.toFixed(2)}
+                  </div>
+                </div>
+                <div className="p-3 bg-yellow-50 rounded border-2 border-yellow-500">
+                  <div className="text-gray-600 text-xs mb-1">You Save with Scenario C:</div>
+                  <div className="font-bold text-yellow-900 text-lg">
+                    ${Math.abs((scenarioATotalPaid + scenarioCInsuranceSavings) - scenarioCTotalCost).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg border-2 border-emerald-400">
+            <p className="text-sm font-semibold text-emerald-900">
+              {scenarioCTotalCost < (scenarioATotalPaid + scenarioCInsuranceSavings) ? (
+                <>
+                  ✅ <strong>Scenario C (Pay in Full) WINS!</strong> Even though the PLC interest rate ({scenarioCPlcInterestRate}%)
+                  is higher than Scenario A ({scenarioAInterestRate}%), the insurance savings of ${scenarioCInsuranceSavings.toFixed(2)}
+                  make paying in full the better choice. You save <strong>${Math.abs((scenarioATotalPaid + scenarioCInsuranceSavings) - scenarioCTotalCost).toFixed(2)}</strong>
+                  overall by avoiding the full insurance requirement.
+                </>
+              ) : (
+                <>
+                  ⚠️ <strong>Scenario A is still better!</strong> Despite the insurance savings, the lower interest rate
+                  in Scenario A ({scenarioAInterestRate}% vs {scenarioCPlcInterestRate}%) makes it the more cost-effective option.
+                </>
+              )}
+            </p>
+          </div>
+
+          <div className="mt-4 p-4 bg-blue-50 rounded border border-blue-300">
+            <h5 className="font-semibold text-blue-900 mb-2 text-sm">📝 Key Takeaways:</h5>
+            <ul className="text-xs text-blue-800 space-y-1 list-disc list-inside">
+              <li>Financing requires full insurance: <strong>+${scenarioCInsuranceSavings.toFixed(2)}</strong> over 5 years</li>
+              <li>PLC has higher interest ({scenarioCPlcInterestRate}%) but no contract registration fee when paying in full</li>
+              <li>GIC opportunity cost: <strong>${scenarioCGicOpportunityCostTotal.toFixed(2)}</strong> over 5 years at {scenarioCGicOpportunityCost}%</li>
+              <li>Total effective interest for Scenario C: <strong>${scenarioCEffectiveInterest.toFixed(2)}</strong> (after insurance savings)</li>
+            </ul>
           </div>
         </div>
       </div>
